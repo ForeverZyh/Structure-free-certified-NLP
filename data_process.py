@@ -10,7 +10,7 @@ import argparse
 
 def get_wordembd(embd_path, data_path):
     word_embd = {}
-    embd_file = os.path.join(embd_file, 'counter-fitted-vectors.txt')
+    embd_file = 'counter-fitted-vectors.txt'
     with open(embd_file, "r") as f:
         tem = f.readlines()
         for line in tem:
@@ -272,7 +272,7 @@ def get_perturbation_set(dataset, data_path, similarity_threshold = 0.8, perturb
         nodeSet = G.subgraph(c).nodes()
         if len(nodeSet) > 1:
             if len(nodeSet) <= perturbation_constraint:
-                tem_key_list = nodeSet
+                tem_key_list = list(nodeSet.keys())
                 tem_num_word = len(tem_key_list)
                 tem_embd_matrix = np.zeros([tem_num_word, dim_vec])
                 for _ in range(len(tem_key_list)):
@@ -289,15 +289,15 @@ def get_perturbation_set(dataset, data_path, similarity_threshold = 0.8, perturb
                     perturb[node]['set'] = tem_list
 
             else:
-                tem_key_list = nodeSet
+                tem_key_list = list(nodeSet.keys())
                 tem_num_word = len(tem_key_list)
                 tem_embd_matrix = np.zeros([tem_num_word, dim_vec])
                 for _ in range(len(tem_key_list)):
                     tem_embd_matrix[_, :] = vocab[tem_key_list[_]]['vec']
                 
                 for node in tqdm(nodeSet):
-                    perturb[node] = {'set': G.subgraph(c).neighbors(node), 'isdivide': 1}
-                    if len(perturb[node]['set']) > size_threshold:
+                    perturb[node] = {'set': G.subgraph(c).degree(node), 'isdivide': 1}
+                    if perturb[node]['set'] > size_threshold:
                         raise ValueError('size_threshold is too small')
 
                     dist_vec = np.dot(vocab[node]['vec'], tem_embd_matrix.T)
